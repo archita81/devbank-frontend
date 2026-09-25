@@ -12,8 +12,14 @@ class App extends Component {
   }
 
   componentDidMount() {
-    fetch(process.env.APIURL)
-      .then((res) => res.json())
+    // Check backend health through the ALB
+    fetch("/api/health")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Health check failed");
+        }
+        return res.json();
+      })
       .then((data) => {
         this.setState({
           backendStatus: data.status
@@ -25,8 +31,14 @@ class App extends Component {
         });
       });
 
-    fetch("http://localhost:5000/api/accounts")
-      .then((res) => res.json())
+    // Get accounts through the ALB
+    fetch("/api/accounts")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Accounts request failed");
+        }
+        return res.json();
+      })
       .then((data) => {
         this.setState({
           accounts: data
@@ -63,7 +75,8 @@ class App extends Component {
             {this.state.accounts.map((account) => (
               <div className="account" key={account.id}>
                 <strong>{account.name}</strong>
-                <br />
+                
+
                 Account Type: {account.accountType}
               </div>
             ))}
@@ -75,3 +88,4 @@ class App extends Component {
 }
 
 export default App;
+ 
